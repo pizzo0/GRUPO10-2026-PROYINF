@@ -9,7 +9,7 @@
 **Tutor:** Carlos Arébalo 
 > **Proyecto Base:** Este repositorio corresponde a la continuación del proyecto desarrollado por el GRUPO24-2025-PROYINF durante el semestre 2025-2.
 
-## Recursos Semestre anterior(Semestre 2025-2)
+## Recursos (Semestre 2025-2)
 Los siguientes enlaces corresponden al trabajo realizado y entregado durante el semestre anterior:
 - [Wiki del proyecto](https://github.com/not-nen/GRUPO24-2025-PROYINF/wiki)
 - [Video del cliente](https://aula.usm.cl/mod/resource/view.php?id=6926137)
