@@ -1,69 +1,80 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { handleSchema, handleData } from "utils/handlers";
+import { useEffect, useRef } from "react";
+import { useNavigate, useResolvedPath, useLocation } from "react-router-dom";
+import { handleData, handleCurrentValues } from "utils/handlers";
 
 export const ADELANTE = "forward";
 export const ATRAS = "backward";
 
+const getCurrentPath = (location, basePath) => location.pathname.startsWith(basePath) ? location.pathname.slice(basePath.length).replace(/^\//, "") : "";
+const getCurrentIndex = (steps, currPath) => steps.findIndex(step => (step.path || "") === currPath);
+const getPath = (path) => path || ".";
+
 /**
+ * UPDATE: ya no es necesario el mainPath, solo se
+ * navega usando { relative: "route" }.
+ * 
  * hook que valida los pasos previos de un wizard multistep form.
  * 
  * mas reutilizable :)
  * 
  * - `steps` - array con los paths de los steps.
- * - `formDataSteps` - array con los datos por step.
- * - `schema` - schema del formulario.
- * - `mainPath` - path base del formulario.
+ * - `getFormData` - para obtener la data del formulario.
+ * - `schemas` - array con los schemas de cada paso del formulario.
  */
-const useStepValidation = ({ steps, formDataSteps, schema, mainPath }) => {
+const useStepValidation = ({ steps, getFormData, schemas }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const resolved = useResolvedPath(".");
 
-    const [direction, setDirection] = useState(ADELANTE);
-    const isManualNav = useRef(false);
+    const direction = useRef("");
 
-    const currPath = location.pathname.replace(mainPath, "").replace(/^\//, "");
-    const currIndex = steps.indexOf(currPath);
+    const basePath = resolved.pathname.replace(/\/$/, "");
+
+    const currPath = getCurrentPath(location, basePath);
+    const currIndex = getCurrentIndex(steps,currPath);
 
     const nextStep = () => {
         if (currIndex < steps.length - 1) {
-            setDirection(ADELANTE);
-            isManualNav.current = true;
-            navigate(`${mainPath}/${steps[currIndex + 1]}`);
+            direction.current = ADELANTE;
+            navigate(getPath(steps[currIndex + 1].path), { relative: "route" });
         }
     };
 
     const prevStep = () => {
         if (currIndex > 0) {
-            setDirection(ATRAS);
-            isManualNav.current = true;
-            navigate(`${mainPath}/${steps[currIndex - 1]}`);
+            direction.current = ATRAS;
+            navigate(getPath(steps[currIndex - 1].path), { relative: "route" });
         }
     };
 
     useEffect(() => {
-        if (isManualNav.current) {
-            isManualNav.current = false;
+        // no valida si te mueves para atras
+        if (direction.current === ATRAS) return;
+
+        // si estas donde no deberias, te manda para el step 0
+        // si recien se carga el forumlario (direction.current === "")
+        // entonces tambien te manda al step 0
+        if (currIndex === -1 || (direction.current === "" && currIndex !== 0)) {
+            navigate(getPath(steps[0].path), { relative: "route" });
             return;
         }
 
-        const currPath = location.pathname.replace(mainPath, "").replace(/^\//, "");
-        const currIndex = steps.indexOf(currPath);
-        const nSteps = steps.length;
-
-        if (currIndex === -1) {
-            navigate(`${mainPath}/${steps[0]}`);
-            return;
-        }
-
+        // para rederigir a la parte del formulario
+        // que no esta completo
         let newIndex = currIndex;
-        for (let i = 0; i < nSteps; i++) {
-            const stepData = handleData(formDataSteps[i]);
-            const stepSchema = Array.isArray(schema) ? schema[i] : schema;
+        let prevHadSchema = true;
+        const check = steps.length < (currIndex + 1) ? steps.length : currIndex + 1;
+        const fixedFormData = handleData(getFormData());
+        for (let i = 0; i < check; i++) {
+            if ((Object.keys(schemas[i].shape).length === 0) && prevHadSchema) {
+                prevHadSchema = false;
+                newIndex = i;
+                continue;
+            }
 
-            if (stepSchema == null) continue; // Step sin validación
-
-            const res = handleSchema(stepData, stepSchema).safeParse(stepData);
+            prevHadSchema = true;
+            const stepData = handleCurrentValues(fixedFormData, steps[i]);
+            const res = schemas[i].safeParse(stepData);
 
             if (!res.success) {
                 newIndex = i;
@@ -71,16 +82,18 @@ const useStepValidation = ({ steps, formDataSteps, schema, mainPath }) => {
             }
         }
 
-        if (currIndex === newIndex) return;
-
+        // solo deberia redirigirte si estas en un index
+        // mayor al que te quiere redirigir
+        // No deberia redirigir si el paso incompleto es
+        // mayor o igual al que esta actualmente
         if (currIndex > newIndex) {
-            setDirection(ATRAS);
-            navigate(`${mainPath}/${steps[newIndex]}`);
+            direction.current = ATRAS;
+            navigate(getPath(steps[newIndex].path), { relative: "route" });
         }
 
-    }, [location.pathname, formDataSteps, steps, schema, navigate, mainPath]);
+    }, [getFormData, schemas, steps, navigate, currIndex]);
 
-    return { nextStep, prevStep, currIndex, direction };
+    return { nextStep, prevStep, currIndex, direction: direction.current };
 };
 
 export default useStepValidation;

@@ -28,4 +28,4 @@ export const formatearDineroStr = (value) => (value) && value.toString().replace
  * - retorna el valor formateado.
  * 
  */
-export const formatearDineroStrBonito = (value) => (value) && 'CLP ' + formatearDineroStr(value);
+export const formatearDineroStrBonito = (value) => (value) && '$ ' + formatearDineroStr(value);

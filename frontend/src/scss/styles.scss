@@ -1,70 +1,90 @@
 @use 'colors' as *;
 
 $btn-transition:
-  color 0.05s ease-in-out,
-  background-color 0.05s ease-in-out,
-  border-color 0.05s ease-in-out,
-  box-shadow 0.05s ease-in-out;
+    color 0.05s ease-in-out,
+    background-color 0.05s ease-in-out,
+    border-color 0.05s ease-in-out,
+    box-shadow 0.05s ease-in-out;
 
 $btn-border-radius: 1.5rem;
 $btn-border-radius-alt: .5rem;
 $focus-ring-opacity: .2;
 
+$font-family-sans-serif: ("Inter", sans-serif);
+
 @use "bootstrap" with (
-  $primary: $primary,
-  $secondary: $secondary,
-  $success: $success,
-  $danger: $danger,
-  $warning: $warning,
-  $info: $info,
-  $light: $light,
-  $dark: $dark,
+    $primary: $primary,
+    $secondary: $secondary,
+    $success: $success,
+    $danger: $danger,
+    $warning: $warning,
+    $info: $info,
+    $light: $light,
+    $dark: $dark,
 
-  $body-bg: $body-bg,
-  $body-color: $secondary,
+    $body-bg: $body-bg,
+    $body-color: $body-color,
 
-  $theme-colors: $theme-colors,
+    $theme-colors: $theme-colors,
 
-  $focus-ring-width: 2px,
-  $focus-ring-opacity: $focus-ring-opacity,
+    $focus-ring-width: 2px,
+    $focus-ring-opacity: $focus-ring-opacity,
 
-  $navbar-brand-font-size: 1rem,
-  $navbar-toggler-padding-x: .25rem,
-  $navbar-toggler-padding-y: .25rem,
-  $navbar-toggler-font-size: 1rem,
-  $navbar-toggler-border-radius: 0,
+    $navbar-brand-font-size: 1rem,
+    $navbar-toggler-padding-x: .25rem,
+    $navbar-toggler-padding-y: .25rem,
+    $navbar-toggler-font-size: 1rem,
+    $navbar-toggler-border-radius: 0,
 
-  $navbar-light-brand-color: $body-color,
-  $navbar-light-toggler-border-color: transparent,
+    $navbar-light-brand-color: $body-color,
+    $navbar-light-toggler-border-color: transparent,
 
-  $container-padding-x: 2rem,
+    $container-padding-x: 2rem,
 
-  $border-color: $secondary,
+    $border-color: $secondary,
 
-  $btn-border-radius: $btn-border-radius,
-  $btn-font-size: 1rem,
-  $btn-padding-x: 1.5rem,
-  $btn-padding-y: 0.7rem,
-  $btn-transition: $btn-transition,
+    $btn-border-radius: $btn-border-radius,
+    $btn-font-size: 1rem,
+    $btn-padding-x: 1.5rem,
+    $btn-padding-y: 0.7rem,
+    $btn-transition: $btn-transition,
 
-  $input-bg: transparent,
-  $input-padding-x: 1rem,
-  $input-padding-y: 0.7rem,
-  $form-label-margin-bottom: 0,
+    $input-border-color: $primary,
+    $input-bg: transparent,
+    $input-padding-x: 1rem,
+    $input-padding-y: 0.7rem,
+    $form-label-margin-bottom: 0,
 
-
+    $font-family-sans-serif: $font-family-sans-serif,
+    $font-family-base: $font-family-sans-serif,
 );
 
 @for $i from 1 through 10 {
-  .w-#{$i}rem { width: #{$i}rem !important; }
-  .h-#{$i}rem { height: #{$i}rem !important; }
+    .w-#{$i}rem { width: #{$i}rem !important; }
+    .h-#{$i}rem { height: #{$i}rem !important; }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Krona+One&display=swap');
+html {
+    font-size: 16px;
+}
+
+$primary-hover: mix($body-color, $primary, 50%);
 
 :root {
-    --bs-body-font-family: "Inter", sans-sefir;
+    --bs-body-font-family: "Inter", sans-serif;
+    --bs-btn-font-family: var(--bs-body-font-family);
     --bs-body-letter-spacing: 0.05rem;
+    --bs-border-color: var(--bs-primary);
+    
+    --navbar-height: 68px;
+    --primary-hover: #{$primary-hover};
+    --transition: 0.1s;
+}
+
+* {
+    font-family: var(--bs-body-font-family);
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 // body {
@@ -73,11 +93,102 @@ $focus-ring-opacity: .2;
 // }
 
 .krona-one-regular {
-  font-family: "Krona One", sans-serif;
+    font-family: "Krona One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 90%;
+    letter-spacing: -0.1rem;
+}
+
+.ibm-plex-mono-thin {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.ibm-plex-mono-extralight {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.ibm-plex-mono-light {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.ibm-plex-mono-regular {
+  font-family: "IBM Plex Mono", monospace;
   font-weight: 400;
   font-style: normal;
-  line-height: 90%;
-  letter-spacing: -0.1rem;
+}
+
+.ibm-plex-mono-medium {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.ibm-plex-mono-semibold {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.ibm-plex-mono-bold {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.ibm-plex-mono-thin-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.ibm-plex-mono-extralight-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.ibm-plex-mono-light-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.ibm-plex-mono-regular-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ibm-plex-mono-medium-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.ibm-plex-mono-semibold-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.ibm-plex-mono-bold-italic {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+  font-style: italic;
+}
+
+
+.bbh-bartle-regular {
+    font-family: "BBH Bartle", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
 .navbar-toggler:focus {
@@ -92,6 +203,47 @@ code {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+
+.custom-navbar-height {
+    height: var(--navbar-height);
+}
+
+.custom-toggler {
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: 30px;
+    height: 20px;
+    position: relative;
+}
+
+.custom-toggler span {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: #000;
+    left: 0;
+    transition: all 0.3s ease;
+}
+
+.custom-toggler span:nth-child(1) {
+    top: 0;
+}
+
+.custom-toggler span:nth-child(2) {
+    bottom: 0;
+}
+
+.custom-toggler[aria-expanded="true"] span:nth-child(1) {
+    transform: rotate(45deg);
+    top: 9px;
+}
+
+.custom-toggler[aria-expanded="true"] span:nth-child(2) {
+    transform: rotate(-45deg);
+    bottom: 9px;
 }
 
 // .container {
@@ -118,11 +270,15 @@ code {
     width: 100%;
 }
 
-.btn-top {
+.btn-rounded-top {
     border-radius: $btn-border-radius $btn-border-radius $btn-border-radius-alt $btn-border-radius-alt;
 }
 
-.btn-bottom {
+.btn-rounded-middle {
+    border-radius: $btn-border-radius-alt $btn-border-radius-alt $btn-border-radius-alt $btn-border-radius-alt;
+}
+
+.btn-rounded-bottom {
     border-radius: $btn-border-radius-alt $btn-border-radius-alt $btn-border-radius $btn-border-radius;
 }
 
@@ -152,6 +308,10 @@ form {
     display: contents;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
 /* .form-container {
     display: flex;
 
@@ -160,3 +320,115 @@ form {
 .form-btns-container {
     display: flex;
 } */
+
+#navbar-collapse {
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    width: 100%;
+    height: calc(100vh - var(--navbar-height));
+
+    display: none;
+    flex-direction: column;
+
+    overflow-y: auto;
+
+    transition: none;
+    z-index: 1999;
+}
+
+#navbar-collapse.show {
+    display: flex;
+}
+
+@media (min-width: 992px) {
+    #navbar-collapse {
+        display: none !important;
+    }
+}
+
+.navbar-toggler {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    width: 20px;
+    height: 10px;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar-toggler span {
+    width: 100%;
+    height: 2px;
+    position: absolute;
+    left: 0;
+    background-color: var(--bs-body-color);
+    transition: transform 0.3s;
+}
+
+.navbar-toggler span:first-child {
+    top: 0;
+}
+.navbar-toggler span:last-child {
+    bottom: 0;
+}
+.navbar-toggler.active span:first-child {
+    transform: translateY(3.375px) rotate(45deg);
+}
+.navbar-toggler.active span:last-child {
+    transform: translateY(-3.375px) rotate(-45deg);
+}
+
+.card-selected {
+    background-color: var(--bs-primary);
+    color: var(--bs-body-bg);
+    border: 2px solid transparent;
+    transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+    .card-element-border {
+        border: 2px solid var(--bs-body-bg);
+        transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+    };
+}
+
+.card-not-selected {
+    background-color: rgba(var(--bs-secondary-rgb), 0.5);
+    color: var(--bs-body-color);
+    border: 2px solid transparent;
+    transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+    .card-element-border {
+        border: 2px solid var(--bs-body-color);
+        transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+    };
+}
+
+.card-selected:hover, .card-not-selected:hover {
+    color: var(--bs-body-bg);
+    background-color: var(--primary-hover);
+    border-color: var(--bs-body-color);
+}
+
+.card-selected:hover .card-element-border,
+.card-not-selected:hover .card-element-border {
+    background-color: var(--bs-body-bg);
+    border: 2px solid var(--bs-body-bg);
+    color: var(--primary-hover);
+}
+
+.card-selected:hover .card-element-border:hover,
+.card-not-selected:hover .card-element-border:hover {
+    color: var(--bs-body-color);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.react-select__control {
+    font-family: inherit;
+}

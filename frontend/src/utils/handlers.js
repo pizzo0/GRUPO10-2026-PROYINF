@@ -1,6 +1,17 @@
-import { schema as ds, defaultData as dd } from "schemas/schema";
-import { formatearDineroNumber } from "utils/formatoDinero";
-import { z } from 'zod';
+// solo para testeo
+export const handleDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * con este se crea el key para los "otherField"
+ */
+export const handleOtherKey = (key) => `${key}_otro`;
+
+/**
+ * para que los props opcionales no tengan valor "" o null
+ * al darselo a un componente, de forma que no tome estos
+ * valores y use el por default (si asi esta definido)
+ */
+export const handleOptionalProp = (key, value) => value != null && value !== "" ? { [key]: value } : {};
 
 /**
  * valida los `values` con el `schema` de zod, para retornar errores.
@@ -9,26 +20,36 @@ import { z } from 'zod';
  * - `schema` - schema Zod para validar los datos.
  * - retorna los errores para usar con Formik.
  */
-export const handleValidation = (values, schema = ds) => {
-    let valuesFix = handleData(values);
-    const res = handleSchema(valuesFix, schema).safeParse(valuesFix);
+export const handleValidation = (values, schema, step) => {
+    // let valuesFix = handleData(values);
+    // const res = handleSchema(valuesFix, schema).safeParse(valuesFix);
+    const data = handleData(values);
+    const res = schema.safeParse(data);
 
     if (res.success) return {};
 
     const errors = {};
     for (const i of res.error.issues) {
         const path = i.path[0];
+        const field = step.fields?.flat().find(field => field.name === path);
 
-        if (path === "monto" && values.monto === "0") errors.monto_otro = i.message;
-        else if (path === "renta" && values.renta === "0") errors.renta_otro = i.message;
-        else if (path === "plazo" && values.plazo === "0") errors.plazo_otro = i.message;
+        if (field?.otherField) {
+            const otherKey = handleOtherKey(path);
+            if (values[path] === "0" || values[path] === 0) {
+                errors[otherKey] = i.message;
+                continue;
+            } else {
+                errors[path] = i.message
+            }
+        }
         else errors[path] = i.message;
     }
-
     return errors;
 };
 
 /**
+ * UPDATE: ya no es necesario
+ * 
  * retorna un schema, que solo validara los datos presentes en `values`, a partir de un `schema`.
  * 
  * si un `key` no esta definido en el schema, se dejara como opcional.
@@ -37,22 +58,22 @@ export const handleValidation = (values, schema = ds) => {
  * - `schema` - el schema a transformar
  * - retorna el schema modificado.
  */
-export const handleSchema = (values, schema) => {
-    const keys = Object.keys(values);
-    const shape = schema.shape;
+// export const handleSchema = (values, schema) => {
+//     const keys = Object.keys(values);
+//     const shape = schema.shape;
 
-    const newShape = {};
+//     const newShape = {};
 
-    for (const k of keys) {
-        if (k in shape) {
-            newShape[k] = shape[k];
-        } else {
-            newShape[k] = z.any().optional();
-        }
-    }
+//     for (const k of keys) {
+//         if (k in shape) {
+//             newShape[k] = shape[k];
+//         } else {
+//             newShape[k] = z.any().optional();
+//         }
+//     }
 
-    return z.object(newShape);
-};
+//     return z.object(newShape);
+// };
 
 
 /**
@@ -68,32 +89,35 @@ export const handleSchema = (values, schema) => {
 export const handleData = (values) => {
     const data = { ...values };
 
-    Object.keys(data).forEach((key) => {
-        if (key.endsWith("_otro")) {
-            const mainKey = key.replace("_otro", "");
-            if (data[mainKey] === "0") data[mainKey] = data[key];
-            delete data[key];
+    Object.keys(values).forEach((key) => {
+        const otherKey = handleOtherKey(key);
+        if (otherKey in values) {
+            if (data[key] === "0" || data[key] === 0) {
+                data[key] = values[otherKey];
+            }
+            delete data[otherKey];
         }
     });
-
-    if ("monto" in data) data.monto = formatearDineroNumber(data.monto);
-    if ("renta" in data) data.renta = formatearDineroNumber(data.renta);
-
     return data;
 };
 
 
 /**
- * retorna, a partir de las keys que tenga un formulario, el
- * initialValues para que formik lo utilice
+ * UPDATE: ahora usa el step hecho en el struct en vez de el schema
+ * 
+ * devuelve el initialValues / CurrentValues / formData del paso actual
  */
-export const handleInitialValues = (keys, defaultData = dd) => {
-    const result = {};
+export const handleCurrentValues = (formData, step) => {
+    const values = {};
 
-    if (keys) keys.forEach(key => {
-        const value = defaultData[key];
-        result[key] = value ?? "";
+    step.fields?.flat().forEach((field) => {
+        values[field.name] = formData[field.name] ?? field.default ?? "";
+
+        if (field.otherField) {
+            const otherKey = handleOtherKey(field.name);
+            values[otherKey] = formData[otherKey] ?? field.otherField.default ?? "";
+        }
     });
 
-    return result;
+    return values;
 };

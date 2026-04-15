@@ -1,4 +1,4 @@
-import { CONFIG_TASAS_BASE } from "../config/tasasBase/configTasasBase.js";
+import CONFIG_CREDITOS from "../config/creditos/configCreditos.js";
 
 /**
  * para obtener la tasa base a partir de la tabla.
@@ -12,10 +12,10 @@ export const obtenerTasaBase = (
     monto,
     plazo
 ) => {
-    const CONFIG_TASA_BASE_TIPO = CONFIG_TASAS_BASE[tipo];
+    const CONFIG_TASA_BASE_TIPO = CONFIG_CREDITOS[tipo].tablaTasaBase;
     if (!CONFIG_TASA_BASE_TIPO) return 1; // por si acaso
     
-    const tabla = [...CONFIG_TASA_BASE_TIPO.tabla].sort((a,b) => {
+    const tabla = [...CONFIG_TASA_BASE_TIPO].sort((a,b) => {
         if (a.montoMax !== b.montoMax) return a.montoMax - b.montoMax;
         return a.plazoMax - b.plazoMax;
     });

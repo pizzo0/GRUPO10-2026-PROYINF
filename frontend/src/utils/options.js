@@ -1,7 +1,7 @@
 import { formatearDineroStr, formatearDineroStrBonito } from "utils/formatoDinero";
 
 // PLAZO
-const optionPlazo = [
+const optionsPlazo = [
     { value: '6', label: '6 meses' },
     { value: '12', label: '12 meses' },
     { value: '24', label: '24 meses' },
@@ -46,4 +46,4 @@ optionsRenta.push({
     label: "Otro"
 })
 
-export { optionsRenta, optionPlazo };
+export { optionsRenta, optionsPlazo };

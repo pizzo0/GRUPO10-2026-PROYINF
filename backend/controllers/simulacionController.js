@@ -1,61 +1,69 @@
 import { db } from "../utils/db.js";
 import { validarRut } from "../utils/validarInfo.js";
-import { calcularRiesgoEstimado, calcularCAE, calcularTasaMensualFinal, calcularMensualAAnualNominal } from "../utils/calcularInfo.js";
-import { obtenerTasaBase } from "../utils/obtenerInfo.js";
+import { calcularCreditoSimulado, calcularRecomendacionesCreditoSimulado } from "../utils/calcularInfo.js";
 
+const cleanNumber = (value) => Number(value.toString().replace(/,/g, "").trim());
 
 export const simulacionController = async (req,res) => {
     try {
-        let { rut, renta, monto, plazo, pago } = req.body;
+        let { rut, renta, monto, plazo, primer_pago } = req.body;
 
+        const tipo = "consumo"; // hardcodeado por ahora, o para siempre no se xd
         rut = rut ? rut.trim() : "";
-        renta = renta ? Number(renta.toString().trim()) : 0;
-        monto = monto ? Number(monto.toString().trim()) : 0;
-        plazo = plazo ? Number(plazo.toString().trim()) : 0;
-        pago = pago ? pago.trim() : "";
+        renta = renta ? cleanNumber(renta) : 0;
+        monto = monto ? cleanNumber(monto) : 0;
+        plazo = plazo ? cleanNumber(plazo) : 0;
+        primer_pago = primer_pago ? primer_pago.trim() : "";
 
         
         if (rut && !(await validarRut(rut))) return res.status(400).json({
             error: "Rut ingresado no pertenece a una persona real."
         });
 
-        if (!renta || !monto || !plazo || !pago || renta <= 0 || monto <= 0 || plazo <= 0) return res.status(400).json({
-            error: "Información entregada es errónea, no es posible procesarla."
+        if (!renta || !monto || !plazo || !primer_pago || renta <= 0 || monto <= 0 || plazo <= 0) return res.status(400).json({
+            error: `Información entregada es errónea, no es posible procesarla.
+            `
         });
 
-        const tasaBaseMensual = obtenerTasaBase("consumo", monto, plazo);
-        if (tasaBaseMensual == null) return res.status(500).json({
-            error: "No se encontró una tasa base."
-        });
+        let sim;
+        let rec;
 
-        const ajusteRiesgoMensual = calcularRiesgoEstimado(monto, plazo, renta);
-        const tasaMensual = calcularTasaMensualFinal("consumo",tasaBaseMensual,ajusteRiesgoMensual);
-
-        if (!tasaMensual && tasaMensual !== 0) return res.status(500).json({
-            error: "No se pudo calcular la tasa mensual final."
-        });
-
-        const tasaAnual = calcularMensualAAnualNominal(tasaMensual);
-        const cuota = monto * (tasaMensual / (1 - Math.pow(1 + tasaMensual, -plazo)));
-        const CAE = calcularCAE(monto, plazo, cuota);
-        const CTC = cuota * plazo;
+        try {
+            sim = calcularCreditoSimulado({
+                tipo,
+                rut,
+                monto,
+                plazo,
+                renta,
+                primer_pago,
+                body:req.body,
+            });
+            rec = calcularRecomendacionesCreditoSimulado({
+                tipo,
+                rut,
+                monto,
+                plazo,
+                renta,
+                primer_pago,
+                body:req.body,
+                sim,
+            });
+        } catch (e) {
+            return res.status(500).json({
+                error: `Error en la simulación: ${e.message}`
+            });
+        }
 
         return res.json({
-            monto: monto,
-            cuotaMensual: Math.round(cuota),
-            tasaMensual: (tasaMensual * 100).toFixed(3),
-            tasaAnual: (tasaAnual * 100).toFixed(2),
-            tasaBaseMensual: (tasaBaseMensual * 100).toFixed(3),
-            ajusteRiesgoMensual: (ajusteRiesgoMensual * 100).toFixed(3),
-            CAE: CAE.toFixed(2),
-            CTC: Math.round(CTC),
-            pago: pago,
-            solicitud: { rut, renta, monto, plazo, pago }
+            options: [
+                sim,
+                ...rec,
+            ]
         });
     } catch (e) {
         console.error(e);
         return res.status(500).json({
-            error: `Error al simular crédito: ${e.message}`
+            error: `Error con datos ingresados: ${e.message}`
         });
     }
 }

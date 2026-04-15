@@ -1,6 +1,7 @@
 import { ErrorMessage } from "formik";
 import TextHelp from "components/subComponents/TextHelp";
 
+
 /**
  * input para un formulario.
  * 
@@ -29,7 +30,7 @@ const Input = ({
     return (
         <div className="mt-2 position-relative mt-3">
             {label && (
-                <label htmlFor={id || name} className="form-label bg-light" style={{position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", padding: "0 0.25rem", top:"-0.8rem", left: "0.75rem", gap:"0.25rem"}}>
+                <label htmlFor={id || name} className={`form-label bg-light ${hasError ? "text-danger" : ""}`} style={{position:"absolute", display:"flex", justifyContent:"center", alignItems:"center", padding: "0 0.25rem", top:"-0.8rem", left: "0.75rem", gap:"0.25rem"}}>
                     {label}
                     {required && <span className="text-danger"> *</span>}
                 </label>

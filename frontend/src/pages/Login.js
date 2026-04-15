@@ -1,95 +1,89 @@
-import { useFormikContext } from "formik";
-import Input from "components/inputs/Input";
-import BtnsContainer from "components/containers/BtnsContainer";
-import FillContainer from "components/containers/FillContainer";
-import InputsContainer from "components/containers/InputsContainer";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { WizardRouter } from "components/renderers/wizardRenderer";
 
-import { useLogin } from "context/loginContext";
+import Span from "components/Span";
+
+import { useAuth } from "context/authContext";
 import { formatearRut } from "utils/formatoRut";
+import { validations } from "schemas/schema";
 
-import { LoginProvider } from "context/loginContext";
+const Login = () => {
+    const { login } = useAuth();
 
-const Login = () => null;
-
-Login.data = ["rut", "password"];
-
-Login.Form = function LoginForm() {
-    const { values, errors, touched, handleBlur, handleChange, setFieldValue } = useFormikContext();
-    const { error } = useLogin();
-
-    const handleRut = (e) => {
+    const handleRut = ({ e, field, handleChange, setFieldValue }) => {
         handleChange(e);
-        setFieldValue("rut", formatearRut(e.target.value));
+        setFieldValue(field, formatearRut(e.target.value));
     };
 
-    return (
-        <>
-            <FillContainer>
-                <h1 className="display-1 krona-one-regular">Inicia sesión</h1>
-            </FillContainer>
+    const struct = {
+        submitButtonText: (
+            <Span>
+                Iniciar sesión
+                <ArrowRight size="1rem" />
+            </Span>
+        ),
 
-            <InputsContainer>
-                <Input
-                    id="rut"
-                    name="rut"
-                    label="Rut"
-                    value={values.rut}
-                    onChange={handleRut}
-                    onBlur={handleBlur}
-                    placeholder="11.111.111-1"
-                    errors={errors}
-                    touched={touched}
-                />
+        onSubmit: async ({ formData, setSubmitting, setStatus, navigate }) => {
+            try {
+                const res = await login(formData.rut, formData.password);
 
-                <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    label="Contraseña"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    errors={errors}
-                    touched={touched}
-                />
+                if (res.ok) {
+                    navigate("/", { replace: true });
+                } else {
+                    setStatus(res.error);
+                }
+            } catch (e) {
+                console.error(e);
+                setSubmitting(false);
+            }
+        },
 
-                {error && <p className="text-danger mt-2">{error}</p>}
-            </InputsContainer>
-        </>
-    );
-};
+        steps: [
+            {
+                path: "",
+                content: (
+                    <h1 className="display-1 krona-one-regular">
+                        Inicia sesión
+                    </h1>
+                ),
 
-Login.Buttons = function LoginButtons() {
-    const { values } = useFormikContext();
-    const { handleLogin, loading } = useLogin();
+                fields: [
+                    {
+                        id: "rut",
+                        name: "rut",
+                        type: "text",
+                        placeholder: "11.111.111-1",
+                        onChange: handleRut,
+                        label: "Rut",
+                        validation: validations.rut_required,
+                    },
+                    {
+                        id: "password",
+                        name: "password",
+                        type: "password",
+                        placeholder: "••••••••",
+                        label: "Contraseña",
+                        validation: validations.password_required,
+                    }
+                ],
 
-    const submitLogin = async () => {
-        const res = await handleLogin(values.rut, values.password);
-        if (res.ok) window.location.href = "/";
+                bottomButtons: [
+                    {
+                        text: (
+                            <Span>
+                                <ArrowLeft size={"1rem"} />
+                                Volver al inicio
+                            </Span>
+                        ),
+                        onClick: ({navigate}) => navigate("/"),
+                        className: "btn btn-secondary"
+                    }
+                ]
+            }
+        ]
     };
 
-    return (
-        <BtnsContainer>
-            <button
-                type="button"
-                className="btn btn-primary btn-top"
-                disabled={loading}
-                onClick={submitLogin}
-            >
-                {loading ? "Ingresando..." : "Ingresar"}
-            </button>
-
-            <button
-                type="button"
-                className="btn btn-outline-dark btn-bottom"
-                onClick={() => (window.location.href = "/")}
-            >
-                ← Volver al inicio
-            </button>
-        </BtnsContainer>
-    );
+    return WizardRouter(struct);
 };
-
-Login.Provider = LoginProvider;
 
 export default Login;

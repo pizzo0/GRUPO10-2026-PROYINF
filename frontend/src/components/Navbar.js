@@ -1,86 +1,179 @@
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "context/authContext";
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const { isAuthenticated, logout } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
 
-    
-    const isActive = (path) => location.pathname === path ? "active fw-bold" : "";
+    const isActive = (path) => location.pathname === path;
+        //  ? "active fw-bold" : "";
+
+    const NavbarCollapseElement = ({ title, className, classNameSpan, to, onClick }) => (
+        <div
+            className={`d-flex align-items-center w-100 p-3 px-4 cursor-pointer ${className}`}
+            onClick={() => {
+                setIsOpen(false);
+
+                if (onClick) return onClick();
+                if (to) navigate(to);
+            }}
+        >
+            <span className={(to ? (isActive(to) ? "text-primary" : "") : "") + " user-select-none " + classNameSpan}>
+                {title}
+            </span>
+        </div>
+    );
+
+    const NavbarElement = ({ title, className, classNameSpan, to, onClick }) => (
+        <div
+            className={`d-flex justify-content-center align-items-center cursor-pointer ${className}`}
+            onClick={() => {
+                setIsOpen(false);
+
+                if (onClick) return onClick();
+                if (to) navigate(to);
+            }}
+        >
+            <span className={(to ? (isActive(to) ? "text-primary" : "") : "") + " user-select-none " + classNameSpan}>
+                {title}
+            </span>
+        </div>
+    )
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add("overflow-hidden");
+        } else {
+            document.body.classList.remove("overflow-hidden");
+        }
+    }, [isOpen]);
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-            <div className="container-fluid px-4">
-                <Link className="navbar-brand krona-one-regular text-primary" to="/">
-                    Test
-                </Link>
-                
-                <button 
-                    className="navbar-toggler" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" 
-                    aria-expanded="false" 
-                    aria-label="Toggle navigation"
+        <>
+            <nav className="navbar navbar-expand-lg bg-body custom-navbar-height border-bottom border-opacity-10 border-primary" style={{
+                position: "sticky",
+                zIndex: 2000,
+                top: 0,
+            }}>
+
+                <div
+                    id="navbar-collapse"
+                    className={`collapse navbar-collapse bg-body ${isOpen ? "show" : ""}`}
                 >
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-
-                <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
-                    <ul className="navbar-nav gap-2">
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive("/")}`} to="/">Inicio</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive("/simulador")}`} to="/simulador">Simulador</Link>
-                        </li>
-                        
-                        {}
-                        {isAuthenticated && (
-                            <li className="nav-item">
-                                <Link className={`nav-link ${isActive("/historial")}`} to="/historial">Historial</Link>
-                            </li>
-                        )}
-                        {/* ----------------------------------------------------------------- */}
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive("/escanear")}`} to="/escanear">Herramienta OCR</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive("/about")}`} to="/about">Sobre el Proyecto</Link>
-                        </li>
-                    </ul>
-                    
-                    <ul className="navbar-nav gap-2">
-                        {isAuthenticated ? (
-                            <li className="nav-item">
-                                <button 
-                                    className="btn btn-outline-danger btn-sm rounded-pill px-3" 
-                                    onClick={logout}
-                                >
-                                    Cerrar Sesión
-                                </button>
-                            </li>
-                        ) : (
-                            <>
-                                <li className="nav-item">
-                                    <Link className="btn btn-outline-primary btn-sm rounded-pill px-3" to="/iniciar-sesion">
-                                        Iniciar Sesión
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="btn btn-primary btn-sm rounded-pill px-3" to="/crear-cuenta">
-                                        Crear Cuenta
-                                    </Link>
-                                </li>
-                            </>
-                        )}
-                    </ul>
+                    <NavbarCollapseElement
+                        title="Inicio"
+                        to="/"
+                    />
+                    <NavbarCollapseElement
+                        title="Simulador"
+                        to="/simular-credito"
+                    />
+                    { isAuthenticated &&
+                        <NavbarCollapseElement
+                            title="Historial"
+                            to="/historial"
+                        />
+                    }
+                    <NavbarCollapseElement
+                        title="Herramienta OCR"
+                        to="/escanear"
+                    />
+                    <NavbarCollapseElement
+                        title="Sobre el Proyecto"
+                        to="/about"
+                    />
+                    <br/>
+                    {isAuthenticated ? (
+                        <NavbarCollapseElement
+                            title="Cerrar Sesión"
+                            onClick={logout}
+                        />
+                    ) : (
+                        <>
+                            <NavbarCollapseElement
+                                title="Iniciar Sesión"
+                                to="/iniciar-sesion"
+                            />
+                            <NavbarCollapseElement
+                                title="Crear Cuenta"
+                                to="/crear-cuenta"
+                            />
+                        </>
+                    )}
                 </div>
-            </div>
-        </nav>
+
+                <div className="container-fluid gap-3 px-4" style={{
+                    maxWidth:1320,
+                }}>
+                    <NavbarElement
+                        title="G10"
+                        onClick={() => navigate("/")}
+                        classNameSpan="fs-5 krona-one-regular"
+                    />
+
+                    <div
+                        className="p-2 cursor-pointer"
+                        onClick={() => setIsOpen(prev => !prev)}
+                    >
+                        <button
+                            className={`navbar-toggler ${isOpen ? "active" : ""}`}
+                            type="button"
+                        >
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
+                    <div className="justify-content-between d-none d-lg-flex gap-3 w-100">
+                        <div className="d-flex gap-3">
+                            <NavbarElement
+                                title="Inicio"
+                                to="/"
+                            />
+
+                            <NavbarElement
+                                title="Simulador"
+                                to="/simular-credito"
+                            />
+
+                            <NavbarElement
+                                title="Herramienta OCR"
+                                to="/escanear"
+                            />
+
+                            <NavbarElement
+                                title="Sobre el Proyecto"
+                                to="/about"
+                            />
+                        </div>
+
+                        <div className="justify-content-between d-none d-lg-flex gap-3">
+                            { isAuthenticated ? (
+                                <NavbarElement
+                                    title="Cerrar Sesión"
+                                    onClick={logout}
+                                />
+                            ) : (
+                                <>
+                                    <NavbarElement
+                                        title="Iniciar Sesión"
+                                        to="/iniciar-sesion"
+                                    />
+                                    <NavbarElement
+                                        title="Crear Cuenta"
+                                        to="/crear-cuenta"
+                                    />
+                                </>
+                            ) }
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </>
     );
-}
+};
 
 export default Navbar;

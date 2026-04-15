@@ -1,31 +1,107 @@
-$dark-alt: #1D0CC8;
-$body-bg: #e8e8f6;
-$body-color: #0c0c11;
+// claro
+// $dark-alt: #1D0CC8;
+// $body-bg: #e8e8f6;
+// $body-color: #0c0c11;
 
-$primary: #1D1DF1;
-$secondary: #000074;
-$tertiary: #E1D8FF;
-$quaternary: #4000FF;
-$quinary: $body-bg;
+// $primary: #1D1DF1;
+// $secondary: #000074;
+// $tertiary: #E1D8FF;
+// $quaternary: #4000FF;
+// $quinary: $body-bg;
+// $success: #73df60;
+// $danger: #df6060;
+// $warning: #dfb360;
+// $info: #6b60df;
+// $light: #F5F5F5;
+// $dark: #00002f;
+
+
+// $theme-colors: (
+//     "primary": $primary,
+//     "secondary": $secondary,
+//     "tertiary": $tertiary,
+//     "quaternary": $quaternary,
+//     "quinary": $quinary,
+//     "success": $success,
+//     "danger": $danger,
+//     "warning": $warning,
+//     "info": $info,
+//     "light": $light,
+//     "dark": $dark,
+//     "dark-alt": $dark-alt,
+// );
+
+// oscuro
+// $body-bg: #060808;
+// $body-color: #e4ebed;
+
+// $primary: #a2c7d1;
+// $secondary: #223f48;
+// $tertiary: #68b5ca;
+// // $quaternary: #4000FF;
+// // $quinary: $body-bg;
+// $success: #73df60;
+// $danger: #df6060;
+// $warning: #dfb360;
+// $info: #6b60df;
+// $light: mix($primary, $body-bg, 7.5%);
+// $dark: #020303;
+
+// // $dark-alt: $primary;
+
+
+// $theme-colors: (
+//     "primary": $primary,
+//     "secondary": $secondary,
+//     "tertiary": $tertiary,
+// //     "quaternary": $quaternary,
+// //    "quinary": $quinary,
+//     "success": $success,
+//     "danger": $danger,
+//     "warning": $warning,
+//     "info": $info,
+//     "light": $light,
+//     "dark": $dark,
+// //    "dark-alt": $dark-alt,
+// );
+
+// oscuro
+// $body-bg: #030c08;
+// $body-color: #e9faf2;
+
+// $primary: #8ee5bf;
+// $secondary: #1d447f;
+// $tertiary: #4641d4;
+// $success: #73df60;
+// $danger: #df6060;
+// $warning: #dfb360;
+// $info: #6b60df;
+// $light: mix($primary, $body-bg, 7.5%);
+// $dark: $body-bg;
+
+$body-bg: #040501;
+$body-color: #eef5dc;
+
+$primary: #c6de8f;
+$secondary: #287f87;
+$tertiary: #457dc8;
 $success: #73df60;
 $danger: #df6060;
 $warning: #dfb360;
 $info: #6b60df;
-$light: #F5F5F5;
-$dark: #00002f;
+$light: mix($primary, $body-bg, 7.5%);
+$dark: $body-bg;
 
 
 $theme-colors: (
     "primary": $primary,
     "secondary": $secondary,
     "tertiary": $tertiary,
-    "quaternary": $quaternary,
-    "quinary": $quinary,
     "success": $success,
     "danger": $danger,
     "warning": $warning,
     "info": $info,
+    "text": $body-color,
     "light": $light,
     "dark": $dark,
-    "dark-alt": $dark-alt,
 );

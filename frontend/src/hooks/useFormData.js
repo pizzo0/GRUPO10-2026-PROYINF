@@ -1,40 +1,45 @@
-import { useState } from "react";
+import { useRef } from "react";
 
 /**
+ * UPDATE: ahora usa useRef en vez de useState, para evitar
+ * doble renderizado innecesario en los formularios
+ * 
  * hook para manejar la data de un formulario.
  * 
  * - `defaultData` - la data que debe tener el form por defecto.
  */
 export const useFormData = (defaultData = {}) => {
-    const [formData, setFormData] = useState({ ...defaultData });
+    const formData = useRef({ ...defaultData });
+
+    const getFormData = () => formData.current;
 
     const setField = (key, value) => {
-        setFormData(prev => ({
-            ...prev,
+        formData.current = {
+            ...formData.current,
             [key]: value,
-        }));
+        };
     };
 
     const setFields = (values) => {
-        setFormData(prev => ({
-            ...prev,
+        formData.current = {
+            ...formData.current,
             ...values,
-        }));
+        };
     };
 
     const resetField = (key) => {
-        setFormData(prev => ({
-            ...prev,
+        formData.current = {
+            ...formData.current,
             [key]: defaultData[key],
-        }));
+        };
     };
 
     const resetForm = () => {
-        setFormData({ ...defaultData });
+        formData.current = { ...defaultData };
     };
 
     return {
-        formData,
+        getFormData,
         setField,
         setFields,
         resetField,

@@ -49,4 +49,4 @@ Object.keys(TABLAS_TASAS_BASE).forEach(tipo => {
     });
 });
 
-export { TABLAS_TASAS_BASE };
+export default TABLAS_TASAS_BASE;

@@ -1,5 +1,5 @@
-import { CONFIG_RIESGO } from "../config/riesgo/configRiesgo.js";
-import { CONFIG_CREDITOS } from "../config/creditos/configCreditos.js";
+import CONFIG_CREDITOS from "../config/creditos/configCreditos.js";
+import { obtenerTasaBase } from "./obtenerInfo.js";
 
 /**
  * calcula el ajuste de riesgo estimado
@@ -8,26 +8,23 @@ import { CONFIG_CREDITOS } from "../config/creditos/configCreditos.js";
  * - plazo - numero de cuotas.
  * - renta - renta mensual de la persona.
  */
-export const calcularRiesgoEstimado = (monto, plazo, renta) => {
+export const calcularRiesgoEstimado = (tipo, monto, plazo, renta) => {
     const ratio = monto/(renta*plazo);
     if (!Number.isFinite(ratio) || ratio < 0) return 0;
 
     // USAMOS LA TABLA
-    const tabla = [...CONFIG_RIESGO.tablaEstimado].sort((a,b) => a.maxRango - b.maxRango);
-    if (CONFIG_RIESGO.usarTablaEstimado) {
+    const tabla = [...CONFIG_CREDITOS[tipo].tablaRiesgoEstimado].sort((a,b) => a.maxRango - b.maxRango);
+    if (CONFIG_CREDITOS[tipo].usarTablaRiesgoEstimado) {
         for (const r of tabla) if (ratio <= r.maxRango) return r.ajuste;
         return tabla.at(-1).ajuste ?? 0; // por si acaso
     }
 
     // USAMOS EL AJUSTE LOGISTICO
-    let {
-        usarMaximoTabla: USAR_MAXIMO_TABLA,
+    const {
         maximo: AJUSTE_MAX,
         pendiente: K,
         ratio: X0,
-    } = CONFIG_RIESGO.ajusteLogistico;
-
-    if (USAR_MAXIMO_TABLA) AJUSTE_MAX = tabla.at(-1).ajuste;
+    } = CONFIG_CREDITOS[tipo].ajusteLogisticoRiesgoEstimado;
 
     return AJUSTE_MAX / (1 + Math.exp(-K * (ratio - X0)));
 };
@@ -135,3 +132,184 @@ export const calcularTasaMensualFinal = (
     const tasaAnualAjustada = Math.min(Math.max(tasaAnualPre, TASA_ANUAL_MIN),TASA_ANUAL_MAX);
     return calcularAnualAMensualNominal(tasaAnualAjustada);
 };
+
+/**
+ * redondea montos, ESTO ES SOLO PARA LAS RECOMENADCIONES EN EL
+ * SIMULADOR !!!
+ * 
+ * por ejemplo:
+ * 23_982_938 -> 24_000_000
+ * 14_930 -> 15_000
+ * 13_103_000 -> 13_000_000
+ */
+export const calcularRedondeoMonto = (monto) => {
+    if (monto <= 0) return 0;
+    const magnitud = Math.pow(10, Math.floor(Math.log10(monto)) - 1);
+    return Math.round(monto/magnitud) * magnitud;
+}
+
+/**
+ * genera montos candidatos, ESTO ES SOLO PARA LAS RECOMENDACIONES
+ * EN EL SIMULADOR !!!!
+ */
+export const calcularMontosCandidatos = (
+    monto,
+    variacion = 0.075
+) => {
+    const min = monto * (1-variacion);
+    const max = monto * (1+variacion);
+
+    const candidatos = new Set();
+    for (let i = min; i <= max; i += (max-min)/5) candidatos.add(calcularRedondeoMonto(i));
+
+    return Array.from(candidatos);
+}
+
+/**
+ * genera plazos candidatos, ESTO ES SOLO PARA LAS RECOMENDACIONES
+ * EN EL SIMULADOR !!!!
+ */
+export const calcularPlazosCandidatos = (
+    plazo,
+    plazoMin,
+    plazoMax,
+    variacion = 0.5
+) => {
+    const min = Math.max(plazoMin, Math.floor(plazo * (1 - variacion)));
+    const max = Math.min(plazoMax, Math.ceil(plazo * (1 + variacion)));
+
+    const plazos = [];
+    for (let p = min; p <= max; p++) {
+        plazos.push(p);
+    }
+
+    return plazos;
+};
+
+export const calcularCreditoSimulado = ({
+    tipo,
+    rut,
+    monto,
+    plazo,
+    renta,
+    primer_pago,
+    body
+}) => {
+    // const { montoMin, montoMax, plazoMin, plazoMax } = CONFIG_CREDITOS[tipo];
+    
+    const tasaBaseMensual = obtenerTasaBase(tipo, monto, plazo);
+    if (tasaBaseMensual == null) {
+        throw new Error("No se encontró una tasa base");
+    };
+
+    const ajusteRiesgoMensual = calcularRiesgoEstimado(tipo, monto, plazo, renta);
+    const tasaMensual = calcularTasaMensualFinal(tipo, tasaBaseMensual, ajusteRiesgoMensual);
+
+    if (!tasaMensual && tasaMensual !== 0) {
+        throw new Error("No se pudo calcular la tasa mensual final");
+    };
+
+    const tasaAnual = calcularMensualAAnualNominal(tasaMensual);
+    const cuota = monto * (tasaMensual / (1 - Math.pow(1+tasaMensual, -plazo)));
+    if (!isFinite(cuota)) {
+        throw new Error("No se pudo calculando la cuota mensual");
+    }
+    const CAE = calcularCAE(monto, plazo, cuota);
+
+    if (CAE == null || !Number.isFinite(CAE)) {
+        throw new Error("CAE inválido");
+    }
+    const CTC = cuota * plazo;
+
+    return {
+        tipo,
+        monto,
+        plazo,
+        cuota_mensual: Math.round(cuota),
+        tasa_mensual: (tasaMensual * 100).toFixed(3),
+        tasa_anual: (tasaAnual * 100).toFixed(2),
+        cae: parseFloat(CAE.toFixed(2)),
+        ctc: Math.round(CTC),
+        solicitud: body,
+    };
+}
+
+export const calcularRecomendacionesCreditoSimulado = ({
+    tipo,
+    rut,
+    monto,
+    plazo,
+    renta,
+    primer_pago,
+    body,
+    sim,
+}) => {
+    const { montoMin, montoMax, plazoMin, plazoMax } = CONFIG_CREDITOS[tipo];
+
+    const montos = calcularMontosCandidatos(monto).filter(m => m >= montoMin && m <= montoMax);
+    const plazos = calcularPlazosCandidatos(plazo, plazoMin, plazoMax);
+
+    const res = [];
+    console.log(montos);
+    console.log(plazos);
+    for (const m of montos) {
+        for (const p of plazos) {
+            try {
+                const newBody = {
+                    ...body,
+                    monto: m,
+                    plazo: p,
+                };
+                const sim = calcularCreditoSimulado({
+                    tipo,
+                    rut,
+                    monto: m,
+                    plazo: p,
+                    renta,
+                    primer_pago,
+                    body:newBody,
+                });
+                if (sim) res.push(sim);
+            } catch (e) {
+                // ignoramos el error nada mas xd
+                continue;
+            }
+        }
+    }
+    if (res.length === 0) return [];
+
+    const minCAE = res.reduce((a,b) => a.cae < b.cae ? a : b);
+    const minCTC = res.reduce((a,b) => a.ctc < b.ctc ? a : b);
+    const minCuota = res.reduce((a,b) => a.cuota_mensual < b.cuota_mensual ? a : b);
+
+    const aux = [
+        { obj: minCAE, rec: "Menor CAE" },
+        { obj: minCTC, rec: "Menor CTC" },
+        { obj: minCuota, rec: "Menor Cuota" }
+    ];
+
+    const map = new Map();
+
+    map.set(sim, []); 
+
+    for (const { obj, rec } of aux) {
+        if (obj === sim) continue;
+
+        if (!map.has(obj)) {
+            map.set(obj, [rec]);
+        } else {
+            map.get(obj).push(rec);
+        }
+    }
+
+    const final_res = [];
+
+    for (const [obj, recs] of map.entries()) {
+        if (obj === sim) continue;
+
+        obj.rec = recs.join(", ");
+        final_res.push(obj);
+    }
+
+    return final_res;
+}

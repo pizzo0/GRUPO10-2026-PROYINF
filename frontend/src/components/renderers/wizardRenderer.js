@@ -1,26 +1,30 @@
-import { Fragment } from 'react';
-import { Route } from 'react-router-dom';
+import { useNavigate, Route } from 'react-router-dom';
 import { Formik, Form } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { handleDelay, handleOptionalProp, handleCurrentValues, handleValidation, handleData } from "utils/handlers";
+
 import useWizard, { WizardProvider } from "context/wizardContext";
-import { handleInitialValues, handleValidation } from "utils/handlers";
+import WizardStep from "components/renderers/WizardStep";
+import WizardButtons from "components/renderers/WizardButtons";
+
 import FormContainer from "components/containers/FormContainer";
-import PrevStepBtn from "components/subComponents/PrevStepBtn";
 
 export const WizardRenderer = () => {
-    const { config, schema, formData, setFields, currIndex, direction, nextStep, prevStep, ADELANTE } =
-        useWizard();
+    const navigate = useNavigate();
+    const { struct, schemas, getFormData, setFields, currIndex, nextStep, ADELANTE, direction, length } = useWizard();
 
-    const Step = config[currIndex].component;
-    const initialValues = handleInitialValues(Step.data, formData);
-
-    const StepProvider = Step.Provider || Fragment;
-
+    const initialValues = handleCurrentValues(getFormData(), struct.steps[currIndex]);
     if (!initialValues || Object.values(initialValues).some((v) => v === undefined)) return null;
 
-    const duration = 0.15;
+    // console.log("FORMDATA:",getFormData());
+    // console.log("SCHEMAS:",schemas[currIndex].shape)
 
+    // console.log("-----------------------");
+    // console.log("INITIALVALUES",initialValues);
+
+    // esto es para la animacion nada mas
+    const duration = 0.15;
     const variants = {
         enter: (dir) => ({ x: dir === ADELANTE ? 100 : -100, opacity: 0 }),
         center: { x: 0, opacity: 1 },
@@ -29,24 +33,39 @@ export const WizardRenderer = () => {
 
     return (
         <FormContainer>
-            {currIndex !== 0 && <PrevStepBtn onClick={prevStep} />}
+            {
+                // currIndex !== 0 && <PrevStepBtn onClick={prevStep} />
+            }
 
             <Formik
-                key={currIndex}
+                key={`motion_div_${currIndex}`}
                 initialValues={initialValues}
-                enableReinitialize={true}
-                validate={(values) => handleValidation(values, schema)}
+                enableReinitialize={false}
+                validate={(values) => handleValidation(values, schemas[currIndex], struct.steps[currIndex])}
                 validationOnBlur={true}
-                onSubmit={(values) => {
+                onSubmit={async (values, formikHelpers) => {
                     setFields(values);
-                    nextStep();
+                    formikHelpers.setStatus(undefined);
+                    
+                    // console.log("FORMDATA:",getFormData());
+
+                    await handleDelay(500);
+                    if (currIndex === (struct.steps?.length - 1)) {
+                        await struct.onSubmit({
+                            formData:handleData(getFormData()),
+                            navigate,
+                            ...formikHelpers,
+                        });
+                    } else {
+                        nextStep();
+                        // setSubmitting(false);
+                    }
                 }}
             >
-                <Form>
-                    <StepProvider>
+                    <Form>
                         <AnimatePresence mode="wait" custom={direction}>
                             <motion.div
-                                key={currIndex}
+                                key={`motion_div_${currIndex}`}
                                 custom={direction}
                                 variants={variants}
                                 initial="enter"
@@ -55,33 +74,34 @@ export const WizardRenderer = () => {
                                 transition={{ duration }}
                                 className="d-flex flex-column fit-flex h-100"
                             >
-                                <Step.Form />
+                                <WizardStep/>
                             </motion.div>
                         </AnimatePresence>
-                        <Step.Buttons />
-                    </StepProvider>
-                </Form>
+                        <WizardButtons
+                            index={currIndex}
+                            length={length}
+                            topButtons={struct.steps[currIndex].topButtons ?? []}
+                            bottomButtons={struct.steps[currIndex].bottomButtons ?? []}
+                            {...handleOptionalProp("submitText", struct.submitButtonText)}
+                            {...handleOptionalProp("continueText", struct.steps[currIndex].continueButtonText)}
+                            {...handleOptionalProp("backText", struct.steps[currIndex].backButtonText)}
+                        />
+                    </Form>
             </Formik>
         </FormContainer>
     );
 };
 
-export const WizardRouter = (mainPath, config) => {
-    return (
-        <Route
-            path={mainPath}
-            element={
-                <WizardProvider
-                    config={config}
-                    mainPath={mainPath}
-                >
-                    <WizardRenderer />
-                </WizardProvider>
-            }
-        >
-            {config.map((step, i) => (
-                <Route key={i} path={step.path} element={<div />} />
-            ))}
-        </Route>
-    )
-}
+export const WizardRouter = (struct) => (
+    <Route
+        element={
+            <WizardProvider struct={struct} >
+                <WizardRenderer />
+            </WizardProvider>
+        }
+    >
+        {struct.steps.map((step, i) => (
+            <Route key={i} path={step.path} element={<div />} />
+        ))}
+    </Route>
+);

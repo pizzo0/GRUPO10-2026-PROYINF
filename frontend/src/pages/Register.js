@@ -1,151 +1,135 @@
-import { useFormikContext } from "formik";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { WizardRouter } from "components/renderers/wizardRenderer";
+import Span from "components/Span";
 
-import Input from "components/inputs/Input";
-import BtnsContainer from "components/containers/BtnsContainer";
-import FillContainer from "components/containers/FillContainer";
-import InputsContainer from "components/containers/InputsContainer";
-
+import { useAuth } from "context/authContext";
 import { formatearRut } from "utils/formatoRut";
-import { useRegister } from "context/registerContext";
-import { useNavigate } from "react-router-dom";
+import { validations } from "schemas/schema";
 
-import { RegisterProvider } from "context/registerContext";
+const Register = () => {
+    const { register } = useAuth();
 
-const Register = () => null;
-
-Register.data = [
-    "rut",
-    "nombre",
-    "apellido",
-    "email",
-    "password",
-    "confirmPassword"
-];
-
-Register.Form = function RegisterForm() {
-    const { values, handleChange, handleBlur, setFieldValue, errors, touched } = useFormikContext();
-    const { error } = useRegister();
-
-    const handleRut = (e) => {
-        const formatted = formatearRut(e.target.value);
-        setFieldValue("rut", formatted);
+    const handleRut = ({ e, field, handleChange, setFieldValue }) => {
+        handleChange(e);
+        setFieldValue(field, formatearRut(e.target.value));
     };
 
-    return (
-        <>
-            <FillContainer>
-                <h1 className="display-1 krona-one-regular">Crea tu cuenta</h1>
-            </FillContainer>
-            <InputsContainer>
-                <Input
-                    id="rut"
-                    name="rut"
-                    label="RUT"
-                    value={values.rut}
-                    onChange={handleRut}
-                    onBlur={handleBlur}
-                    required
-                    maxLength={12}
-                    placeholder="11.111.111-1"
-                    errors={errors}
-                    touched={touched}
-                />
+    const struct = {
+        submitButtonText: (
+            <Span>
+                Crear cuenta
+                <ArrowRight size="1rem" />
+            </Span>
+        ),
 
-                <Input
-                    id="nombre"
-                    name="nombre"
-                    label="Nombre"
-                    value={values.nombre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    errors={errors}
-                    touched={touched}
-                />
+        onSubmit: async ({ formData, setSubmitting, setStatus, navigate }) => {
+            try {
+                const res = await register(formData);
+                if (res.ok) {
+                    navigate("/iniciar-sesion", { replace: true });
+                } else {
+                    setStatus(res.error);
+                }
+            } catch (e) {
+                console.error("REGISTER ERROR:", e);
+                setSubmitting(false);
+            }
+        },
 
-                <Input
-                    id="apellido"
-                    name="apellido"
-                    label="Apellido"
-                    value={values.apellido}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    errors={errors}
-                    touched={touched}
-                />
+        steps: [
+            { // 1
+                path: "",
+                content: (
+                    <h1 className="display-1 krona-one-regular">
+                        Crear cuenta
+                    </h1>
+                ),
 
-                <Input
-                    id="email"
-                    name="email"
-                    label="Correo"
-                    type="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    errors={errors}
-                    touched={touched}
-                />
+                fields: [
+                    {
+                        id: "nombre",
+                        name: "nombre",
+                        type: "text",
+                        placeholder: "Juanito",
+                        label: "Nombre",
+                        validation: validations.nombre,
+                        required: true
+                    },
+                    {
+                        id: "apellido",
+                        name: "apellido",
+                        type: "text",
+                        placeholder: "Perez",
+                        label: "Apellido",
+                        validation: validations.apellido,
+                        required: true
+                    }
+                ],
 
-                <Input
-                    id="password"
-                    name="password"
-                    label="Contraseña"
-                    type="password"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    maxLength={32}
-                    errors={errors}
-                    touched={touched}
-                />
+                bottomButtons: [
+                    {
+                        text: (
+                            <Span>
+                                <ArrowLeft size={"1rem"} />
+                                Volver al inicio
+                            </Span>
+                        ),
+                        onClick: ({navigate}) => navigate("/"),
+                        className: "btn btn-secondary"
+                    }
+                ]
+            }, // 2
+            {
+                path: "credenciales",
+                content: (
+                    <h1 className="display-1 krona-one-regular">
+                        Credenciales
+                    </h1>
+                ),
 
-                <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    label="Confirmar contraseña"
-                    type="password"
-                    value={values.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    required
-                    maxLength={32}
-                    errors={errors}
-                    touched={touched}
-                />
-
-                {error && <p className="form-text text-danger">{error}</p>}
-            </InputsContainer>
-        </>
-    );
-};
-
-Register.Buttons = function RegisterButtons() {
-    const { registerUser, loading } = useRegister();
-    const navigate = useNavigate();
-    const { values } = useFormikContext();
-
-    const submit = async () => {
-        const res = await registerUser(values);
-        if (res.ok) navigate("/login");
+                fields: [
+                    {
+                        id: "rut",
+                        name: "rut",
+                        type: "text",
+                        placeholder: "11.111.111-1",
+                        label: "Rut",
+                        onChange: handleRut,
+                        validation: validations.rut_required,
+                        required: true
+                    },{
+                        id: "email",
+                        name: "email",
+                        type: "email",
+                        placeholder: "correo@ejemplo.com",
+                        label: "Correo",
+                        validation: validations.email,
+                        required: true
+                    },
+                    {
+                        id: "password",
+                        name: "password",
+                        type: "password",
+                        placeholder: "••••••••",
+                        label: "Contraseña",
+                        validation: validations.password,
+                        required: true
+                    },
+                    {
+                        id: "confirmPassword",
+                        name: "confirmPassword",
+                        type: "password",
+                        placeholder: "••••••••",
+                        label: "Confirmar contraseña",
+                        validation: validations.confirm_password,
+                        required: true
+                    }
+                ],
+            }
+        ]
     };
 
-    return (
-        <BtnsContainer>
-            <button
-                type="button"
-                className="btn btn-primary"
-                onClick={submit}
-                disabled={loading}
-            >
-                {loading ? "Registrando..." : "Crear cuenta →"}
-            </button>
-        </BtnsContainer>
-    );
+    return WizardRouter(struct);
 };
-
-Register.Provider = RegisterProvider;
 
 export default Register;
