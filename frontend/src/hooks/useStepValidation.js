@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useResolvedPath, useLocation } from "react-router-dom";
 import { handleData, handleCurrentValues } from "utils/handlers";
 
@@ -20,13 +20,15 @@ const getPath = (path) => path || ".";
  * - `steps` - array con los paths de los steps.
  * - `getFormData` - para obtener la data del formulario.
  * - `schemas` - array con los schemas de cada paso del formulario.
+ * - `useStorage` - se usa o no (booleano) el storage de la sesion.
+ * - `storageKey` - key donde se guardara el formData en la sesion.
  */
-const useStepValidation = ({ steps, getFormData, schemas }) => {
+const useStepValidation = ({ steps, getFormData, schemas, hasSavedData }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const resolved = useResolvedPath(".");
 
-    const direction = useRef("");
+    const [ direction, setDirection ] = useState("");
 
     const basePath = resolved.pathname.replace(/\/$/, "");
 
@@ -35,26 +37,26 @@ const useStepValidation = ({ steps, getFormData, schemas }) => {
 
     const nextStep = () => {
         if (currIndex < steps.length - 1) {
-            direction.current = ADELANTE;
+            setDirection(ADELANTE);
             navigate(getPath(steps[currIndex + 1].path), { relative: "route" });
         }
     };
 
     const prevStep = () => {
         if (currIndex > 0) {
-            direction.current = ATRAS;
+            setDirection(ATRAS);
             navigate(getPath(steps[currIndex - 1].path), { relative: "route" });
         }
     };
 
     useEffect(() => {
         // no valida si te mueves para atras
-        if (direction.current === ATRAS) return;
+        if (direction === ATRAS) return;
 
         // si estas donde no deberias, te manda para el step 0
-        // si recien se carga el forumlario (direction.current === "")
+        // si recien se carga el forumlario (direction === "")
         // entonces tambien te manda al step 0
-        if (currIndex === -1 || (direction.current === "" && currIndex !== 0)) {
+        if (!hasSavedData() && (currIndex === -1 || (direction === "" && currIndex !== 0))) {
             navigate(getPath(steps[0].path), { relative: "route" });
             return;
         }
@@ -87,13 +89,13 @@ const useStepValidation = ({ steps, getFormData, schemas }) => {
         // No deberia redirigir si el paso incompleto es
         // mayor o igual al que esta actualmente
         if (currIndex > newIndex) {
-            direction.current = ATRAS;
+            setDirection(ATRAS);
             navigate(getPath(steps[newIndex].path), { relative: "route" });
         }
 
-    }, [getFormData, schemas, steps, navigate, currIndex]);
+    }, [getFormData, schemas, steps, navigate, currIndex, direction, hasSavedData]);
 
-    return { nextStep, prevStep, currIndex, direction: direction.current };
+    return { nextStep, prevStep, currIndex, direction };
 };
 
 export default useStepValidation;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 import { handleOtherKey } from "utils/handlers";
 import { useFormData } from "hooks/useFormData";
@@ -9,6 +9,8 @@ const wizardContext = createContext(null);
 
 export const WizardProvider = ({ children, struct }) => {
     const steps = struct.steps;
+    const storageKey = `wizard-form-${struct.id}`;
+    const useStorage = true;
 
     const hasFieldNameOrId = (field) => field && (field.name || field.id);
     const getFieldNameOrId = (field) => field.name ?? field.id;
@@ -47,31 +49,29 @@ export const WizardProvider = ({ children, struct }) => {
             const key = getFieldNameOrId(field);
 
             schemaObj[key] = getFieldValidation(field) ?? z.any();
-
-            // other
-            // if (field.type === "select" && field.otherField) {
-            //     const otherKey = handleOtherKey(key);
-            //     schemaObj[otherKey] = getFieldValidation(field) ?? z.any();
-
-            //     // se obtiene el del field (no desde el otherField)
-            // } else if (field.type !== "select" && field.otherField) {
-            //     throw new Error(
-            //         "para usar otherField, debes usar 'select' como 'type'"
-            //     );
-            // }
         });
 
         return z.object(schemaObj);
     });
 
     // se genera el formData donde se guardaran los datos de cada field y ls setters
-    const { getFormData, setField, setFields } = useFormData(defaultData);
+    const { getFormData, setField, setFields, hasSavedData } = useFormData(defaultData, useStorage, storageKey);
 
     const { nextStep, prevStep, currIndex, direction } = useStepValidation({
         steps,
         schemas,
         getFormData,
+        hasSavedData
     });
+
+    // solo borra el formData en memoria si te sales del flujo del formulario
+    useEffect(() => {
+        return () => {
+            if (useStorage) {
+                sessionStorage.removeItem(storageKey);
+            }
+        }
+    }, [useStorage, storageKey]);
 
     return (
         <wizardContext.Provider

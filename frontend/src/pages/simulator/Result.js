@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import { Save, Circle, CircleCheck, ArrowRight, Form, Sparkles } from 'lucide-react';
+import { 
+    // Save, 
+    Circle, 
+    CircleCheck, 
+    // ArrowRight, 
+    // Form, 
+    Sparkles 
+} from 'lucide-react';
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
@@ -9,38 +16,38 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import { useAuth } from "context/authContext";
-
-import BtnsContainer from "components/containers/BtnsContainer";
+// import { useAuth } from "context/authContext";
 
 import { backendUrl } from "utils/backend";
 import { formatearDineroStrBonito } from "utils/formatoDinero";
 
-import Container from "components/containers/Container";
-import { handleDelay } from "utils/handlers";
+// import Container from "components/containers/Container";
+// import Surface from "components/containers/Surface";
 import SpinnerGrow from "components/spinners/SpinnerGrow";
 import FillContainer from "components/containers/FillContainer";
 import Span from "components/Span";
 
-const handleSaveSimulation = async (data, token) => {
-    if (!data) return { ok: false, error: "No hay datos" };
+import { handleDelay } from "utils/handlers";
 
-    try {
-        const res = await fetch(backendUrl + "/api/simulacion/guardar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify(data)
-        });
-        const json = await res.json();
-        if (!res.ok) return { ok: false, error: json.error };
-        return { ok: true };
-    } catch (e) {
-        return { ok: false, errr: "Error de conexión" };
-    }
-}
+// const handleSaveSimulation = async (data, token) => {
+//     if (!data) return { ok: false, error: "No hay datos" };
+
+//     try {
+//         const res = await fetch(backendUrl + "/api/simulacion/guardar", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `Bearer ${token}`,
+//             },
+//             body: JSON.stringify(data)
+//         });
+//         const json = await res.json();
+//         if (!res.ok) return { ok: false, error: json.error };
+//         return { ok: true };
+//     } catch (e) {
+//         return { ok: false, errr: "Error de conexión" };
+//     }
+// }
 
 /**
  * aqui deberian llegar todos los resultados de las
@@ -54,24 +61,15 @@ const handleSaveSimulation = async (data, token) => {
  * desde aqui se puede tambien partir la solicitud
  * del credito simulado
  */
-const Result = () => {
+const Result = ({formData, selected, setSelected}) => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const { user, isAuthenticated } = useAuth();
-
-    const formData = location.state?.formData;
+    // const { user, isAuthenticated } = useAuth();
 
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selected, setSelected] = useState(null);
 
     useEffect(() => {
-        if (!formData) {
-            navigate("..", { replace: true, relative: "path" })
-            return;
-        }
-
         const fetchData = async () => {
             try {
                 const res = await fetch(backendUrl + "/api/simulacion", {
@@ -108,17 +106,11 @@ const Result = () => {
     );
     if (error) return <span>ERROR: {error}</span>;
 
-    const saveSimulation = async () => {
-        const res = await handleSaveSimulation(selected, user.token);
-        if (res.ok) alert("Simulacion guardada");
-        else alert(res.error);
-    };
-
-    const onApply = () => {
-        navigate("/solicitar-credito", {
-            state: { request:selected },
-        })
-    };
+    // const saveSimulation = async () => {
+    //     const res = await handleSaveSimulation(selected, user.token);
+    //     if (res.ok) alert("Simulacion guardada");
+    //     else alert(res.error);
+    // };
 
     const SimulationCard = ({
         data,
@@ -170,90 +162,55 @@ const Result = () => {
         )
     };
 
-    console.log(selected);
-
     return (
-        <Container className="fit-flex h-100">
-            <Container className="fit-flex justify-content-center align-items-center py-2">
-                <h1 className="text-center krona-one-regular">
-                    Resultado de tu Simulación
-                </h1>
-            </Container>
+        <>
+            <Swiper
+                className="pb-4 rounded-4"
+                style={{
+                    width: "100%",
+                    "--swiper-pagination-color": "var(--bs-primary)",
+                    "--swiper-pagination-bullet-inactive-color": "rgba(var(--bs-secondary-rgb), 0.5)",
+                    "--swiper-pagination-bullet-inactive-opacity": "1",
+                    "--swiper-pagination-bullet-size": "0.5rem",
+                    "--swiper-pagination-bullet-horizontal-gap": "0.5rem",
+                    "--swiper-pagination-bullet-border-radius": "0.5rem",
+                    "--swiper-pagination-bottom": "1.5px",
+                }}
+                modules={[ Pagination ]}
+                pagination={{ clickable: true }}
+                spaceBetween={20}
+                slidesPerView={1}
+                breakpoints={{
+                    768: {
+                        slidesPerView: 2,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                    },
+                }}
+            >
+                {data.options.map((option,index) => (
+                    <SwiperSlide key={index}>
+                        <SimulationCard
+                            data={option}
+                            isSelected={selected === option}
+                            onSelect={setSelected}
+                            recommended={option.rec ?? ""}
+                        />
+                    </SwiperSlide>
+                ))}
+            </Swiper>
 
-            <Container className="bg-light p-3 pb-0 rounded-5">
-                {/* <Container>
-                    <p>Resumen de tu simulación</p>
-                    {JSON.stringify(formData)}
-                </Container> */}
-                <Swiper
-                    className="pb-4 rounded-4"
-                    style={{
-                        width: "100%",
-                        "--swiper-pagination-color": "var(--bs-primary)",
-                        "--swiper-pagination-bullet-inactive-color": "rgba(var(--bs-secondary-rgb), 0.5)",
-                        "--swiper-pagination-bullet-inactive-opacity": "1",
-                        "--swiper-pagination-bullet-size": "0.5rem",
-                        "--swiper-pagination-bullet-horizontal-gap": "0.5rem",
-                        "--swiper-pagination-bullet-border-radius": "0.5rem",
-                        "--swiper-pagination-bottom": "1.5px",
-                    }}
-                    modules={[ Pagination ]}
-                    pagination={{ clickable: true }}
-                    spaceBetween={20}
-                    slidesPerView={1}
-                    breakpoints={{
-                        768: {
-                            slidesPerView: 2,
-                        },
-                        1024: {
-                            slidesPerView: 3,
-                        },
-                    }}
-                >
-                    {data.options.map((option,index) => (
-                        <SwiperSlide key={index}>
-                            <SimulationCard
-                                data={option}
-                                isSelected={selected === option}
-                                onSelect={setSelected}
-                                recommended={option.rec ?? ""}
-                            />
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
-            </Container>
-
-            <BtnsContainer>
-                <button
-                    className="btn btn-primary btn-top"
-                    onClick={onApply}
-                >
+            {/* ESTO AUN NO FUNCIONA */}
+            {/* {!isAuthenticated && (
+                <button className="btn btn-primary" onClick={saveSimulation}>
                     <Span>
-                        Solicitar mi crédito
-                        <ArrowRight size={"1rem"} />
+                        <Save size={"1.25rem"} strokeWidth={1.75} />
+                        Guardar Simulación
                     </Span>
                 </button>
-
-                {isAuthenticated && (
-                    <button className="btn btn-primary" onClick={saveSimulation}>
-                        <Span>
-                            <Save size={"1.25rem"} strokeWidth={1.75} />
-                            Guardar Simulación
-                        </Span>
-                    </button>
-                )}
-
-                <button
-                    className="btn btn-secondary btn-bottom"
-                    onClick={() => navigate("..", { relative: "path" })}
-                >
-                    <Span>
-                        <Form size={"1.25rem"} strokeWidth={1.75} />
-                        Hacer otra simulación
-                    </Span>
-                </button>
-            </BtnsContainer>
-        </Container>
+            )} */}
+        </>
     );
 }
 

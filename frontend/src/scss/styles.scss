@@ -10,7 +10,7 @@ $btn-border-radius: 1.5rem;
 $btn-border-radius-alt: .5rem;
 $focus-ring-opacity: .2;
 
-$font-family-sans-serif: ("Inter", sans-serif);
+// $font-family-sans-serif: ("Inter", sans-serif);
 
 @use "bootstrap" with (
     $primary: $primary,
@@ -19,8 +19,6 @@ $font-family-sans-serif: ("Inter", sans-serif);
     $danger: $danger,
     $warning: $warning,
     $info: $info,
-    $light: $light,
-    $dark: $dark,
 
     $body-bg: $body-bg,
     $body-color: $body-color,
@@ -55,23 +53,47 @@ $font-family-sans-serif: ("Inter", sans-serif);
     $input-padding-y: 0.7rem,
     $form-label-margin-bottom: 0,
 
-    $font-family-sans-serif: $font-family-sans-serif,
-    $font-family-base: $font-family-sans-serif,
+    // $font-family-sans-serif: $font-family-sans-serif,
+    // $font-family-base: $font-family-sans-serif,
 );
+
+@for $i from 1 through 100 {
+    .bg-opacity-#{$i} {
+        --bs-bg-opacity: #{$i / 100};
+    }
+}
+
+@each $name, $color in $theme-colors {
+    @for $i from 1 through 100 {
+        .btn-#{$name}.btn-opacity-#{$i} {
+            $opacity: $i / 100;
+            --bs-btn-bg: #{rgba($color, $opacity)};
+            --bs-btn-border-color: #{rgba($color, 0)};
+
+            // hover
+            --bs-btn-hover-bg: #{rgba(mix(white, $color, 15%), $opacity)};
+            --bs-btn-hover-border-color: #{rgba(mix(white, $color, 20%), 0)};
+
+            // active
+            --bs-btn-active-bg: #{rgba(mix(white, $color, 25%), $opacity)};
+            --bs-btn-active-border-color: #{rgba(mix(white, $color, 20%), 0)};
+
+            // disabled
+            --bs-btn-disabled-bg: #{rgba($color, $opacity)};
+            --bs-btn-disabled-border-color: #{rgba($color, 0)};
+        }
+    }
+}
 
 @for $i from 1 through 10 {
     .w-#{$i}rem { width: #{$i}rem !important; }
     .h-#{$i}rem { height: #{$i}rem !important; }
 }
 
-html {
-    font-size: 16px;
-}
-
 $primary-hover: mix($body-color, $primary, 50%);
 
 :root {
-    --bs-body-font-family: "Inter", sans-serif;
+    --bs-body-font-family: "Montserrat", sans-serif;
     --bs-btn-font-family: var(--bs-body-font-family);
     --bs-body-letter-spacing: 0.05rem;
     --bs-border-color: var(--bs-primary);
@@ -85,6 +107,10 @@ $primary-hover: mix($body-color, $primary, 50%);
     font-family: var(--bs-body-font-family);
     font-optical-sizing: auto;
     font-style: normal;
+}
+
+html {
+    font-size: 16px;
 }
 
 // body {
@@ -347,6 +373,13 @@ form {
     }
 }
 
+@media (max-width: 768px) {
+    .fit-flex-fixed {
+        flex: 1 1 auto;
+        min-height: fit-content;
+    }
+}
+
 .navbar-toggler {
     display: inline-block;
     cursor: pointer;
@@ -380,12 +413,12 @@ form {
 }
 
 .card-selected {
-    background-color: var(--bs-primary);
-    color: var(--bs-body-bg);
+    background-color: rgba(var(--bs-primary-rgb), 0.5);
+    color: var(--bs-body-color);
     border: 2px solid transparent;
     transition: background-color var(--transition), color var(--transition), border-color var(--transition);
     .card-element-border {
-        border: 2px solid var(--bs-body-bg);
+        border: 2px solid var(--bs-body-color);
         transition: background-color var(--transition), color var(--transition), border-color var(--transition);
     };
 }

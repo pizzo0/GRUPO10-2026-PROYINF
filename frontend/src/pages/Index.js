@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 
-import { Scan, User, Info, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Scan, User, Info, ArrowRight } from 'lucide-react';
 
 import FillContainer from "components/containers/FillContainer";
 import Span from "components/Span";
+import Surface from "components/containers/Surface";
 
 const Index = () => {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Index = () => {
             </div>
 
             {/* Contenedor de Botones */}
-            <div className="d-flex flex-column gap-3 w-100 bg-primary bg-opacity-10 p-3 rounded-6" style={{ maxWidth: "500px" }}>
+            <Surface className="gap-3 w-100 p-3 rounded-6" style={{ maxWidth: "500px" }}>
                 
                 {/*Botón Principal: Simulador */}
                 <button 
@@ -70,7 +71,7 @@ const Index = () => {
                         Sobre el proyecto
                     </Span>
                 </button>
-            </div>
+            </Surface>
 
             {/* Enlace de registro */}
             <div className="text-center mt-2">

@@ -4,6 +4,8 @@ import { WizardRouter } from "components/renderers/wizardRenderer"
 
 const Apply = () => {
     const struct = {
+        id: "apply",
+        name: "Solicitud",
         submitButtonText: "Solicitar credito",
         onSubmit: async ({ formData, setSubmitting, navigate }) => {
             // try {
@@ -21,13 +23,9 @@ const Apply = () => {
         },
         steps: [
             { // 1
+                name: "Antes de continuar",
                 path: "",
-                content: (
-                    <h1 className="display-3 krona-one-regular">
-                        Solicita tu crédito de consumo
-                    </h1>
-                ),
-                contentForm: (
+                contentForm: () => (
                     <div>
                         <p className="mb-3">
                             Antes de continuar con tu solicitud, necesitaremos validar algunos antecedentes.
@@ -49,6 +47,8 @@ const Apply = () => {
                         {/* <p>
                             Si no cuentas con toda la documentación en este momento, puedes guardar tu simulación y retomarla más adelante sin problemas.
                         </p> */}
+
+                        <p className='text-danger'>ESTO ESTA EN PROCESO (es decir, no funciona aun).</p>
                     </div>
                 ),
                 continueButtonText: (
@@ -66,7 +66,7 @@ const Apply = () => {
                             </span>
                         ),
                         onClick: ({navigate}) => navigate("/"),
-                        className: "btn btn-secondary"
+                        className: "btn btn-secondary btn-opacity-25"
                     }
                 ]
             },

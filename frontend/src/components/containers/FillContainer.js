@@ -1,3 +1,5 @@
+import Container from "./Container";
+
 /**
  * contenedor para meter titulos, texto, o nada.
  * 
@@ -6,11 +8,14 @@
  * 
  * - retorna el contenedor
 */
-const FillContainer = ({children}) => {
+const FillContainer = ({children, className = "", ...props}) => {
     return (
-        <div className="d-flex flex-column px-4 h-100 fit-flex justify-content-center align-items-center">
-            {children ?? <p></p>}
-        </div>
+        <Container
+            className={`h-100 fit-flex justify-content-center align-items-center ${className}`}
+            {...props}
+        >
+            {children ?? <div></div>}
+        </Container>
     )
 }
 

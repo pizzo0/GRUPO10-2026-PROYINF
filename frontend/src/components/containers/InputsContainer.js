@@ -1,14 +1,16 @@
-import Container from "components/containers/Container";
+import Surface from "./Surface";
 
 /**
  * contenedor para meter inputs.
  * 
  * - retorna el contenedor
 */
-const InputsContainer = ({children, className}) => (
-    <Container className={"bg-light p-3 px-4 rounded-4 " + className}>
+const InputsContainer = ({children, className = "", ...props}) => (
+    <Surface
+        className={"p-4 rounded-4 " + className}
+        {...props}>
         {children}
-    </Container>
+    </Surface>
 );
 
 export default InputsContainer;

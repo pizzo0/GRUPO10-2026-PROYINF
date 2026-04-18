@@ -15,6 +15,7 @@ const Register = () => {
     };
 
     const struct = {
+        id: "register",
         submitButtonText: (
             <Span>
                 Crear cuenta
@@ -39,11 +40,6 @@ const Register = () => {
         steps: [
             { // 1
                 path: "",
-                content: (
-                    <h1 className="display-1 krona-one-regular">
-                        Crear cuenta
-                    </h1>
-                ),
 
                 fields: [
                     {
@@ -75,7 +71,7 @@ const Register = () => {
                             </Span>
                         ),
                         onClick: ({navigate}) => navigate("/"),
-                        className: "btn btn-secondary"
+                        className: "btn btn-secondary btn-opacity-25"
                     }
                 ]
             }, // 2

@@ -34,7 +34,7 @@ const WizardButtons = memo(({index, length, submitText, continueText, backText, 
         ),
         type: "button",
         onClick: prevStep,
-        className: "btn btn-secondary",
+        className: "btn btn-secondary btn-opacity-25",
     };
     const SubmitButton = {
         text: submitText ?? (

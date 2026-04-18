@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import React from "react";
+import Surface from "./Surface";
 
 /**
  * contenedor para meter botones.
  * 
  * - retorna el contenedor
 */
-const BtnsContainer = ({ children, minWidthRow = 768 }) => {
+const BtnsContainer = ({ children, minWidthRow = 768, className = "", ...props }) => {
     const [isColumn, setIsColumn] = useState(window.innerWidth < minWidthRow);
 
     useEffect(() => {
@@ -41,16 +42,17 @@ const BtnsContainer = ({ children, minWidthRow = 768 }) => {
 
     return (
         <div className="d-flex w-100 flex-row-reverse">
-            <div
-                className={`bg-light d-flex ${isColumn ? "flex-column" : "flex-row-reverse"} gap-2 p-3 rounded-6`}
+            <Surface
+                className={`${isColumn ? "" : "flex-row-reverse"} p-3 rounded-6 ${className}`}
                 style={isColumn ? {
                     width: "100%"
                 } : {
                     width: "fit-content"
                 }}
+                {...props}
             >
                 {fixedChildren}
-            </div>
+            </Surface>
         </div>
     );
 };

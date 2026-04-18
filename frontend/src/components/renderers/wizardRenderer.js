@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate, Route } from 'react-router-dom';
 import { Formik, Form } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,7 +15,9 @@ export const WizardRenderer = () => {
     const navigate = useNavigate();
     const { struct, schemas, getFormData, setFields, currIndex, nextStep, ADELANTE, direction, length } = useWizard();
 
-    const initialValues = handleCurrentValues(getFormData(), struct.steps[currIndex]);
+    const initialValues = useMemo(() => {
+        return handleCurrentValues(getFormData(), struct.steps[currIndex]);
+    }, [currIndex]);
     if (!initialValues || Object.values(initialValues).some((v) => v === undefined)) return null;
 
     // console.log("FORMDATA:",getFormData());
@@ -38,9 +41,8 @@ export const WizardRenderer = () => {
             }
 
             <Formik
-                key={`motion_div_${currIndex}`}
                 initialValues={initialValues}
-                enableReinitialize={false}
+                enableReinitialize={true}
                 validate={(values) => handleValidation(values, schemas[currIndex], struct.steps[currIndex])}
                 validationOnBlur={true}
                 onSubmit={async (values, formikHelpers) => {
@@ -63,18 +65,21 @@ export const WizardRenderer = () => {
                 }}
             >
                     <Form>
-                        <AnimatePresence mode="wait" custom={direction}>
+                        <AnimatePresence
+                            mode="wait"
+                            custom={direction}
+                        >
                             <motion.div
-                                key={`motion_div_${currIndex}`}
+                                key={currIndex}
                                 custom={direction}
                                 variants={variants}
                                 initial="enter"
                                 animate="center"
                                 exit="exit"
                                 transition={{ duration }}
-                                className="d-flex flex-column fit-flex h-100"
+                                className="d-flex fit-flex justify-content-center"
                             >
-                                <WizardStep/>
+                                <WizardStep />
                             </motion.div>
                         </AnimatePresence>
                         <WizardButtons
@@ -95,7 +100,7 @@ export const WizardRenderer = () => {
 export const WizardRouter = (struct) => (
     <Route
         element={
-            <WizardProvider struct={struct} >
+            <WizardProvider key={struct.id} struct={struct} >
                 <WizardRenderer />
             </WizardProvider>
         }

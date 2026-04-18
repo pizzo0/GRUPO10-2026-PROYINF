@@ -1,6 +1,6 @@
-import { ErrorMessage } from "formik";
 import ReactSelect from "react-select";
-import TextHelp from "components/subComponents/TextHelp";
+
+import FieldWrapper from "components/subComponents/FieldWrapper";
 
 const bootstrapSelectStyles = (hasError) => ({
     control: (base, state) => ({
@@ -97,18 +97,11 @@ const Select = ({
     errors = {},
     touched = {},
 }) => {
-    const hasError = touched[name] && errors[name];
-
-    // transformar options a formato react-select (es el mismo, pero por si acaso)
     const rsOptions = options.map(opt => ({
         value: opt.value,
         label: opt.label
     }));
-
-    // encontrar la opción seleccionada basada en value (como select normal)
     const selectedOption = rsOptions.find(opt => opt.value === value) || null;
-
-    // simular evento nativo para no romper tu lógica
     const handleChange = (selected) => {
         onChange({
             target: {
@@ -117,7 +110,6 @@ const Select = ({
             }
         });
     };
-
     const handleBlur = () => {
         onBlur({
             target: {
@@ -127,58 +119,31 @@ const Select = ({
     };
 
     return (
-        <div className="mt-2 position-relative mt-3">
-            {label && (
-                <label
-                    htmlFor={id || name}
-                    className={`form-label bg-light ${hasError ? "text-danger" : ""}`}
-                    style={{
-                        position: "absolute",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        padding: "0 0.25rem",
-                        top: "-0.8rem",
-                        left: "0.75rem",
-                        gap: "0.25rem",
-                        zIndex: 1
-                    }}
-                >
-                    {label}
-                    {required && <span className="text-danger"> *</span>}
-                </label>
+        <FieldWrapper
+            id={id}
+            name={name}
+            label={label}
+            textHelp={textHelp}
+            required={required}
+            errors={errors}
+            touched={touched}
+        >
+            {({ hasError }) => (
+                <ReactSelect
+                    inputId={id || name}
+                    name={name}
+                    options={rsOptions}
+                    value={selectedOption}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder={placeholder}
+                    classNamePrefix="react-select"
+                    className={`${hasError ? "is-invalid" : ""} ${className}`}
+                    // isClearable
+                    styles={bootstrapSelectStyles(hasError)}
+                />
             )}
-
-            <ReactSelect
-                inputId={id || name}
-                name={name}
-                options={rsOptions}
-                value={selectedOption}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder={placeholder}
-                classNamePrefix="react-select"
-                className={`${hasError ? "is-invalid" : ""} ${className}`}
-                isClearable
-                styles={bootstrapSelectStyles(hasError)}
-            />
-
-            {hasError ? (
-                <ErrorMessage name={name}>
-                    {(msg) => (
-                        <div className="invalid-feedback d-block">
-                            {msg}
-                        </div>
-                    )}
-                </ErrorMessage>
-            ) : (
-                textHelp && (
-                    <TextHelp id={id ?? ""} name={name ?? ""}>
-                        {textHelp}
-                    </TextHelp>
-                )
-            )}
-        </div>
+        </FieldWrapper>
     );
 };
 

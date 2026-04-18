@@ -16,6 +16,7 @@ const Login = () => {
     };
 
     const struct = {
+        id: "login",
         submitButtonText: (
             <Span>
                 Iniciar sesión
@@ -41,11 +42,6 @@ const Login = () => {
         steps: [
             {
                 path: "",
-                content: (
-                    <h1 className="display-1 krona-one-regular">
-                        Inicia sesión
-                    </h1>
-                ),
 
                 fields: [
                     {
@@ -56,6 +52,7 @@ const Login = () => {
                         onChange: handleRut,
                         label: "Rut",
                         validation: validations.rut_required,
+                        required: true,
                     },
                     {
                         id: "password",
@@ -64,6 +61,7 @@ const Login = () => {
                         placeholder: "••••••••",
                         label: "Contraseña",
                         validation: validations.password_required,
+                        required: true,
                     }
                 ],
 
@@ -76,7 +74,7 @@ const Login = () => {
                             </Span>
                         ),
                         onClick: ({navigate}) => navigate("/"),
-                        className: "btn btn-secondary"
+                        className: "btn btn-secondary btn-opacity-25"
                     }
                 ]
             }

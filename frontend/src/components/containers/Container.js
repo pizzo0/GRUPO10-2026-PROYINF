@@ -4,8 +4,14 @@
  * 
  * - retorna el contenedor
 */
-const Container = ({children, className, style}) => (
-    <div className={`d-flex flex-column gap-2 ${className}`} style={style}>
+const Container = ({children, className = "", ...props}) => (
+    <div className={`d-flex flex-column gap-2 ${className}`} {...props}>
+        {children}
+    </div>
+)
+
+export const ContainerRow = ({children, className = "", ...props}) => (
+    <div className={`d-flex flex-row gap-2 ${className}`} {...props}>
         {children}
     </div>
 )

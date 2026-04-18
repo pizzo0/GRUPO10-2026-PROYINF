@@ -89,8 +89,6 @@ $success: #73df60;
 $danger: #df6060;
 $warning: #dfb360;
 $info: #6b60df;
-$light: mix($primary, $body-bg, 7.5%);
-$dark: $body-bg;
 
 
 $theme-colors: (
@@ -102,6 +100,4 @@ $theme-colors: (
     "warning": $warning,
     "info": $info,
     "text": $body-color,
-    "light": $light,
-    "dark": $dark,
 );

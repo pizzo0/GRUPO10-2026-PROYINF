@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 import { useAuth } from 'context/authContext';
@@ -25,9 +27,11 @@ import { formatearRut } from "utils/formatoRut";
 import { optionsRenta } from "utils/options";
 
 import Span from "components/Span";
+import Result from './Result';
 
 export const Simulator = () => {
     const { user } = useAuth()
+    const [selected, setSelected] = useState(null);
 
     const handleRut = ({e, field, handleChange, setFieldValue}) => {
         handleChange(e);
@@ -72,6 +76,9 @@ export const Simulator = () => {
     };
 
     const struct = {
+        id: "simulator",
+        name: "Simulador",
+        stepper: true,
         submitButtonText: (
             <Span>
                 Simular mi crédito
@@ -81,13 +88,9 @@ export const Simulator = () => {
         onSubmit: async ({ formData, setSubmitting, navigate }) => {
             console.log("wa my shi");
             try {
-                navigate(
-                    "resultado",
-                    {
-                        relative: "route",
-                        state: { formData }
-                    }
-                );
+                navigate("/solicitar-credito", {
+                    state: { request:selected },
+                })
             } catch (e) {
                 console.error("ERROR:", e);
                 setSubmitting(false);
@@ -96,13 +99,14 @@ export const Simulator = () => {
         steps: [
             { // 1
                 path: "", // para que sea /simulador
-                content: (
-                    <div className="d-flex flex-column fit-flex justify-content-center">
-                        <h1 className="display-3 krona-one-regular">
-                            Simula tu crédito de consumo
-                        </h1>
-                    </div>
-                ),
+                name: "Simula tu crédito de consumo",
+                // content: (
+                //     <div className="d-flex flex-column fit-flex justify-content-center">
+                //         <h1 className="display-3 krona-one-regular">
+                //             Simula tu crédito de consumo
+                //         </h1>
+                //     </div>
+                // ),
                 fields: user ? null : [
                     { // RUT
                         id: "rut",
@@ -113,7 +117,6 @@ export const Simulator = () => {
                         onChange: handleRut,
 
                         label: "Rut",
-                        default: "",
 
                         validation: validations.rut,
                     }
@@ -133,18 +136,12 @@ export const Simulator = () => {
                             </Span>
                         ),
                         onClick: ({navigate}) => navigate("/"),
-                        className: "btn btn-secondary"
+                        className: "btn btn-secondary btn-opacity-25"
                     }
                 ]
             }, { // 2
                 path: "credito",
-                content: (
-                    <div className="d-flex flex-column fit-flex justify-content-center">
-                        <h1 className="display-3 krona-one-regular">
-                            Datos del credito
-                        </h1>
-                    </div>
-                ),
+                name: "Datos del credito",
                 fields: [
                     [
                         { // MONTO
@@ -159,7 +156,6 @@ export const Simulator = () => {
 
                             onChange: handleDinero,
                             label: "Monto",
-                            default: defaultData.monto,
                             required: true,
 
                             validation: validations.monto,
@@ -172,7 +168,6 @@ export const Simulator = () => {
                             textHelp: "Rango aproximado de tu renta liquida mensual.",
 
                             label: "Renta",
-                            default: defaultData.renta,
                             options: optionsRenta,
                             required: true,
 
@@ -185,8 +180,6 @@ export const Simulator = () => {
                                 max: MAX_MONTO,
 
                                 onChange: handleDinero,
-                                // label: "Renta (otro)",
-                                default: defaultData.renta_otro,
                                 required: true,
                             },
 
@@ -204,7 +197,6 @@ export const Simulator = () => {
                             onChange: handlePlazo,
 
                             label: "Plazo",
-                            default: defaultData.plazo,
                             required: true,
 
                             validation: validations.plazo,
@@ -226,6 +218,14 @@ export const Simulator = () => {
                         }
                     ]
                 ]
+            }, {
+                path: "resultado",
+                name: "Resultados de tu simulación",
+                contentForm: ({getFormData}) => <Result
+                    formData={getFormData()}
+                    selected={selected}
+                    setSelected={setSelected}
+                />
             }
         ]
     };
