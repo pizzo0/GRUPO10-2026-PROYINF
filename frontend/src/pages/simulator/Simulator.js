@@ -81,16 +81,18 @@ export const Simulator = () => {
         stepper: true,
         submitButtonText: (
             <Span>
-                Simular mi crédito
+                Solicitar mi crédito
                 <ArrowRight size={"1rem"} />
             </Span>
         ),
         onSubmit: async ({ formData, setSubmitting, navigate }) => {
             console.log("wa my shi");
             try {
-                navigate("/solicitar-credito", {
-                    state: { request:selected },
-                })
+                if (selected) {
+                    navigate("/solicitar-credito", {
+                        state: { apply:selected },
+                    })
+                }
             } catch (e) {
                 console.error("ERROR:", e);
                 setSubmitting(false);
@@ -100,13 +102,6 @@ export const Simulator = () => {
             { // 1
                 path: "", // para que sea /simulador
                 name: "Simula tu crédito de consumo",
-                // content: (
-                //     <div className="d-flex flex-column fit-flex justify-content-center">
-                //         <h1 className="display-3 krona-one-regular">
-                //             Simula tu crédito de consumo
-                //         </h1>
-                //     </div>
-                // ),
                 fields: user ? null : [
                     { // RUT
                         id: "rut",
@@ -217,7 +212,13 @@ export const Simulator = () => {
                             validation: validations.primer_pago,
                         }
                     ]
-                ]
+                ],
+                continueButtonText: (
+                    <Span>
+                        Simular mi crédito
+                        <ArrowRight size={"1rem"} />
+                    </Span>
+                )
             }, {
                 path: "resultado",
                 name: "Resultados de tu simulación",

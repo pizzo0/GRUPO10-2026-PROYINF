@@ -46,11 +46,11 @@ const WizardButtons = memo(({index, length, submitText, continueText, backText, 
     };
 
     let buttons = [...topButtons];
-    if (index === 0) {
-        buttons.push(ContinueButton);
-    } else if (index === length - 1) {
+    if (index === length - 1) {
         buttons.push(SubmitButton);
-        buttons.push(BackButton);
+        if (length !== 1 ) buttons.push(BackButton);
+    } else if (index === 0) {
+        buttons.push(ContinueButton);
     } else {
         buttons.push(ContinueButton);
         buttons.push(BackButton);

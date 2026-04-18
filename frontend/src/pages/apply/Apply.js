@@ -6,7 +6,12 @@ const Apply = () => {
     const struct = {
         id: "apply",
         name: "Solicitud",
-        submitButtonText: "Solicitar credito",
+        submitButtonText: (
+            <span className="d-inline-flex align-items-center gap-1">
+                Solicitar crédito
+                <ArrowRight size={"1rem"} />
+            </span>
+        ),
         onSubmit: async ({ formData, setSubmitting, navigate }) => {
             // try {
             //     navigate(

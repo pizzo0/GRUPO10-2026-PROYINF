@@ -17,6 +17,7 @@ const Login = () => {
 
     const struct = {
         id: "login",
+        name: "Iniciar sesión",
         submitButtonText: (
             <Span>
                 Iniciar sesión
@@ -42,7 +43,6 @@ const Login = () => {
         steps: [
             {
                 path: "",
-
                 fields: [
                     {
                         id: "rut",
