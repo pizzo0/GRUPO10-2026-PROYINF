@@ -96,7 +96,7 @@ const Result = ({formData, selected, setSelected}) => {
         };
 
         fetchData();
-    }, [formData, navigate]);
+    }, [formData, navigate, setSelected]);
 
     if (!formData) return null;
     if (loading) return (

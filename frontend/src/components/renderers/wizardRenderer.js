@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useRef } from "react";
 import { useNavigate, Route } from 'react-router-dom';
 import { Formik, Form } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,9 +15,16 @@ export const WizardRenderer = () => {
     const navigate = useNavigate();
     const { struct, schemas, getFormData, setFields, currIndex, nextStep, ADELANTE, direction, length } = useWizard();
 
-    const initialValues = useMemo(() => {
-        return handleCurrentValues(getFormData(), struct.steps[currIndex]);
-    }, [currIndex]);
+    const lastIndexRef = useRef(null);
+    const initialValuesRef = useRef(null);
+    if (lastIndexRef.current !== currIndex) {
+        initialValuesRef.current = handleCurrentValues(
+            getFormData(),
+            struct.steps[currIndex]
+        );
+        lastIndexRef.current = currIndex;
+    }
+    const initialValues = initialValuesRef.current;
     if (!initialValues || Object.values(initialValues).some((v) => v === undefined)) return null;
 
     // console.log("FORMDATA:",getFormData());
