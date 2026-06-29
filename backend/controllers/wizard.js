@@ -1,9 +1,9 @@
 import express from "express";
 
-import { randomUUID } from "crypto";
-import fs from "fs";
-import path from "path";
-import multer from "multer";
+
+import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 
 const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 min
@@ -273,22 +273,31 @@ export const createWizardStore = ({ mode = "MEMORY", db = null, ttlMs = DEFAULT_
 };
 
 // MULTER
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const fieldname = file.fieldname.replace(/\[\]$/, "");
-        const dir = path.join("wizard", req.wzdId, fieldname);
+        
+        // CORRECCIÓN SONARCLOUD: Sanitizamos el input del usuario con path.basename()
+        const safeWzdId = path.basename(req.wzdId || "default");
+        const safeFieldname = path.basename(fieldname || "upload");
+        
+        const dir = path.join("wizard", safeWzdId, safeFieldname);
         fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
     },
     filename: (req, file, cb) => {
         const name = Buffer.from(file.originalname, "latin1").toString("utf8");
-        cb(null, name);
+        // CORRECCIÓN SONARCLOUD: Sanitizamos el nombre del archivo
+        const safeName = path.basename(name);
+        cb(null, safeName);
     },
 });
 
-const upload = multer({ storage });
-
+// CORRECCIÓN SONARCLOUD: Se agrega un límite de 10 MB para evitar ataques DoS por saturación de memoria
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10 MB
+});
 // VALIDATIONS
 
 const validateKnownFields = async (writableSchemas, fields) => {
