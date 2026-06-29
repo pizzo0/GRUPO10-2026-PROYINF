@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import multer from 'multer';
 
 const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 min
 const WIPE_INTERVAL_MS = 1 * 60 * 1000; // 1 min
